@@ -46,6 +46,16 @@ Open http://localhost:5173 to access:
 - **Lecturer / Display View**: Manage courses, students, generate attendance sessions with classroom GPS coords, project live signed QR codes, and view live attendees.
 - **Student Check-In View**: Mobile-ready interface with GPS auto-detection, live camera QR scanning, check-in submission, and past attendance history.
 
+## Deploying on Render
+
+1. **Build Command**: `pip install -r requirements.txt`
+2. **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+3. **Database Detection**:
+   - If a Render Persistent Disk is attached at `/var/data` (default), the database automatically saves to `/var/data/attendance.db` so data persists across restarts.
+   - If using Render PostgreSQL, set the `DATABASE_URL` environment variable (the app automatically converts `postgres://` to `postgresql://` for SQLAlchemy 2.0).
+   - If running on Render free tier without a persistent disk, it falls back to `./attendance.db`.
+
+
 
 ## Example workflow
 

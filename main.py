@@ -6,6 +6,7 @@ import math
 import os
 import secrets
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Optional
 
 from fastapi import Depends, FastAPI, HTTPException, status
@@ -18,12 +19,26 @@ from sqlalchemy import (
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
-if Path("/var/data").exists():
-    default_db = "sqlite:////var/data/attendance.db"
-else:
-    default_db = "sqlite:///./attendance.db"
-DATABASE_URL = os.getenv("DATABASE_URL", default_db)
-# DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./attendance.db")
+def get_database_url() -> str:
+    # 1. If explicit DATABASE_URL is set in environment (e.g. Render Postgres)
+    env_db = os.getenv("DATABASE_URL")
+    if env_db:
+        # Render PostgreSQL URLs start with postgres://, SQLAlchemy 2.0 requires postgresql://
+        if env_db.startswith("postgres://"):
+            env_db = env_db.replace("postgres://", "postgresql://", 1)
+        return env_db
+
+    # 2. Check for Render persistent disk mount (default is /var/data)
+    render_disk = Path(os.getenv("RENDER_DISK_PATH", "/var/data"))
+    if render_disk.is_dir():
+        db_file = render_disk / "attendance.db"
+        return f"sqlite:///{db_file.as_posix()}"
+
+    # 3. Local development fallback
+    return "sqlite:///./attendance.db"
+
+
+DATABASE_URL = get_database_url()
 QR_SECRET = os.getenv("QR_SECRET", "CHANGE_THIS_TO_A_LONG_RANDOM_SECRET")
 if len(QR_SECRET) < 24:
     raise RuntimeError("QR_SECRET must be at least 24 characters long.")

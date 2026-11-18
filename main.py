@@ -18,7 +18,12 @@ from sqlalchemy import (
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./attendance.db")
+if Path("/var/data").exists():
+    default_db = "sqlite:////var/data/attendance.db"
+else:
+    default_db = "sqlite:///./attendance.db"
+DATABASE_URL = os.getenv("DATABASE_URL", default_db)
+# DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./attendance.db")
 QR_SECRET = os.getenv("QR_SECRET", "CHANGE_THIS_TO_A_LONG_RANDOM_SECRET")
 if len(QR_SECRET) < 24:
     raise RuntimeError("QR_SECRET must be at least 24 characters long.")

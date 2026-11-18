@@ -11,7 +11,7 @@ import type {
 } from './types'
 
 // Use relative /api endpoint (proxied to http://127.0.0.1:8000 via Vite dev server)
-const BASE_URL = import.meta.env.VITE_API_URL || '/api'
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://attendancehub-jke7.onrender.com/' //'/api'
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
